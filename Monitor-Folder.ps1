@@ -1,34 +1,34 @@
 <#
   .SYNOPSIS
-  Skrypt monitoruje określony folder i automatycznie przenosi nowo dodane plik do innej lokalizacji
+  The script monitors a specified folder and automatically moves newly added files to another location.
 
   .DESCRIPTION
-  Skrypt będzie monitorował folder i jeśli pojawi się w nim nowy plik z rozszerzeniem txt, 
-  przeniesie go do innego folderu
+  The script will monitor the folder and if a new file with the txt extension appears in it, 
+  it will move it to another folder.
 
   .PARAMETER folderZrodlowy 
-  Parametr określa ścieżkę do folderu monitorowanego przez skrypt
+  This parameter specifies the path to the folder monitored by the script.
 
   .PARAMETER folderDocelowy
-  Parametr określa ścieżkę do folderu, do którego skrypt przenosi pliki
+  This parameter specifies the path to the folder where the script moves files.
   
   .EXAMPLE
-  PS D:\PythonProjects> . 'D:\PythonProjects\Monitor-Folder.ps1'
-  Przeniesiono plik: przykład1.txt do D:\folderDocelowy
-  Monitorowanie folderu D:\folderZrodlowy rozpoczete. Nacisnij Ctrl+C, aby zatrzymac.
+  PS D:\PythonProjects> . ‘D:\PythonProjects\Monitor-Folder.ps1’
+  File example1.txt moved to D:\DestinationFolder
+  Monitoring of folder D:\SourceFolder started. Press Ctrl+C to stop.
 
 #>
 
-$folderZrodlowy = "D:\folderZrodlowy"  #Zmienna odpowiadająca ścieżce do folderu monitorowanego przez skrypt
-$folderDocelowy = "D:\folderDocelowy"  #Zmienna odpowiadająca ścieżce dp folderu, do którego skrypt przenosi pliki
+$folderZrodlowy = "D:\folderZrodlowy"  #Variable corresponding to the path to the folder monitored by the script
+$folderDocelowy = "D:\folderDocelowy"  #Variable corresponding to the path to the folder to which the script moves files
 
-#Funkcja tworzy folder,do którego skrypt przenosi pliki, jeśli taki folder nie istnieje
+#The function creates a folder to which the script moves files if such a folder does not exist.
 if (-not (Test-Path -Path $folderDocelowy)) {
     New-Item -ItemType Directory -Path $folderDocelowy | Out-Null
     Write-Host "Utworzono folder docelowy: $folderDocelowy"
 }
 
-#Funkcja przenosi plik z rozszerzeniem .txt do innego folderu
+#This function moves a file with the .txt extension to another folder.
 function Move-NewTxtFiles {
     param (
         [string]$source,
@@ -48,14 +48,14 @@ function Move-NewTxtFiles {
 
 Move-NewTxtFiles -source $folderZrodlowy -destination $folderDocelowy
 
-#Monitoruje folder do określonego momentu (utworzenie nowego pliku z rozszerzeniem .txt) 
+#Monitors a folder until a specific moment (creation of a new file with the .txt extension) 
 $watcher = New-Object System.IO.FileSystemWatcher
 $watcher.Path = $folderZrodlowy
 $watcher.Filter = "*.txt"
 $watcher.IncludeSubdirectories = $false
 $watcher.EnableRaisingEvents = $true
 
-#Przenosi nowo utworzone pliki z rozszetzeniem .txt do innego folderu
+#Moves newly created files with the .txt extension to another folder
 $action = {
     $filePath = $Event.SourceEventArgs.FullPath
     $fileName = $Event.SourceEventArgs.Name
@@ -78,9 +78,10 @@ try {
         Start-Sleep -Seconds 1
     } while ($true)
 }
-#Zatrzymuje działanie skryptu
+#Stops the script from running
 finally {
     Unregister-Event -SourceIdentifier $watcher.Created
     $watcher.Dispose()
     Write-Host "Monitorowanie zatrzymane."
+
 }
